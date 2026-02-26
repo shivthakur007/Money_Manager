@@ -82,7 +82,7 @@ if "user" not in st.session_state:
 
 # ---------------- LOGIN UI ----------------
 if st.session_state.user is None:
-    st.title("Expense Tracker 💸")
+    st.title("Money Manager 💸")
     st.markdown("Please sign in to continue")
 
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
