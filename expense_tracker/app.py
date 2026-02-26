@@ -60,6 +60,9 @@ def start_google_oauth():
     return auth_url
 
 def exchange_google_code(code):
+    import os
+    os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # ← add this line
+    
     flow = Flow.from_client_config(
         {
             "web": {
