@@ -12,10 +12,6 @@ st.set_page_config(page_title="Money Manager", layout="wide")
 
 # ---------------- AUTH CONFIG (Your Original) ----------------
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
-GOOGLE_CLIENT_ID = st.secrets["auth"]["google_client_id"]
-GOOGLE_CLIENT_SECRET = st.secrets["auth"]["google_client_secret"]
-REDIRECT_URI = st.secrets["auth"]["redirect_uri"]
-
 
 def firebase_email_signup(email, password):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
@@ -29,56 +25,6 @@ def firebase_email_login(email, password):
     return requests.post(url, json=payload).json()
 
 
-def firebase_google_login(id_token):
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={FIREBASE_API_KEY}"
-    payload = {
-        "postBody": f"id_token={id_token}&providerId=google.com",
-        "requestUri": REDIRECT_URI,
-        "returnSecureToken": True,
-        "returnIdpCredential": True,
-    }
-    return requests.post(url, json=payload).json()
-
-
-def start_google_oauth():
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [REDIRECT_URI],
-            }
-        },
-        scopes=["openid", "email", "profile"],
-        redirect_uri=REDIRECT_URI,
-    )
-
-    auth_url, _ = flow.authorization_url(
-        prompt="consent",
-        access_type="offline",
-        include_granted_scopes="true",
-    )
-    return auth_url
-
-
-def exchange_google_code(code):
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [REDIRECT_URI],
-            }
-        },
-        scopes=["openid", "email", "profile"],
-        redirect_uri=REDIRECT_URI,
-    )
-    flow.fetch_token(code=code, client_secret=GOOGLE_CLIENT_SECRET)
-    return flow.credentials.id_token
 
 # ---------------- SESSION ----------------
 if "user" not in st.session_state:
@@ -104,10 +50,7 @@ if st.session_state.user is None:
                 st.error(resp.get("error", {}).get("message", "Login failed"))
 
         st.divider()
-        st.markdown("Or sign in with Google")
-        google_url = start_google_oauth()
-        st.link_button("Continue with Google", google_url)
-
+        
     with tab2:
         email = st.text_input("Email", key="signup_email")
         password = st.text_input("Password", type="password", key="signup_pass")
@@ -119,21 +62,7 @@ if st.session_state.user is None:
             else:
                 st.error(resp.get("error", {}).get("message", "Signup failed"))
 
-    # Handle Google redirect
-    query = st.query_params
-    if "code" in query:
-        code = query["code"]
-        if isinstance(code, (list, tuple)):
-            code = code[0]
-
-        id_token = exchange_google_code(code)
-        resp = firebase_google_login(id_token)
-        if "localId" in resp:
-            st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
-            st.rerun()
-
-    st.stop()
-
+    
 # ---------------- LOGOUT ----------------
 st.sidebar.success(f"Logged in as {st.session_state.user['email']}")
 if st.sidebar.button("Logout"):
