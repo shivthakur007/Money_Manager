@@ -15,7 +15,7 @@ FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
 GOOGLE_CLIENT_ID = st.secrets["auth"]["google_client_id"]
 GOOGLE_CLIENT_SECRET = st.secrets["auth"]["google_client_secret"]
 REDIRECT_URI = st.secrets["auth"]["redirect_uri"].strip()
-
+st.write(f"DEBUG: Your app is using: `{REDIRECT_URI}`")
 
 def firebase_email_signup(email, password):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
