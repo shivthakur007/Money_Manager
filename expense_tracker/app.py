@@ -63,34 +63,26 @@ def start_google_oauth():
     return auth_url
 
 def exchange_google_code(code):
-    # 1. Clean the URI: Ensure no trailing spaces and consistent slashes
-    clean_redirect_uri = REDIRECT_URI.strip()
-
-    try:
-        flow = Flow.from_client_config(
-            {
-                "web": {
-                    "client_id": GOOGLE_CLIENT_ID,
-                    "client_secret": GOOGLE_CLIENT_SECRET,
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                    "redirect_uris": [clean_redirect_uri],
-                }
-            },
-            scopes=["openid", "email", "profile"],
-            redirect_uri=clean_redirect_uri,
-        )
-        
-        # 2. Fetch token
-        flow.fetch_token(code=code)
-        return flow.credentials.id_token
-        
-    except Exception as e:
-        # 3. If it fails, show the error in the UI so you can debug 
-        # instead of seeing a generic "Redacted" error
-        st.error(f"OAuth Exchange Failed: {str(e)}")
-        st.write(f"Attempted Redirect URI: {clean_redirect_uri}")
-        st.stop()
+    # Strip any accidental whitespace from the secret
+    current_uri = REDIRECT_URI.strip() 
+    
+    flow = Flow.from_client_config(
+        {
+            "web": {
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": [current_uri],
+            }
+        },
+        scopes=["openid", "email", "profile"],
+        redirect_uri=current_uri,
+    )
+    # This line 80 exchange will now succeed if current_uri 
+    # matches what you saved in the Google Cloud Console
+    flow.fetch_token(code=code)
+    return flow.credentials.id_token
 
 
 # ---------------- SESSION ----------------
