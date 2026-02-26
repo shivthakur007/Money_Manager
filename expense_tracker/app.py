@@ -160,7 +160,7 @@ else:
     """
 st.markdown(theme_css, unsafe_allow_html=True)
 
-st.title("Expense Tracker 💸")
+st.title("Money Manager 💸")
 st.markdown("Money saved is equal to money earned")
 
 CATEGORIES = ["Food", "Transport", "Bills", "Shopping", "Entertainment", "Health", "Education", "Other"]
