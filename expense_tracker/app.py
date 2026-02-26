@@ -137,8 +137,8 @@ if dark_mode:
     theme_css = """
     <style>
     .main {
-        background: linear-gradient(135deg, #0b1220, #111827);
-        color: #e5e7eb;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #e2e8f0;
         font-family: 'Inter', sans-serif;
     }
 
@@ -148,29 +148,30 @@ if dark_mode:
     }
 
     h1, h2, h3 {
-        color: #f3f4f6;
+        color: #f8fafc;
         font-weight: 600;
         letter-spacing: -0.3px;
     }
 
     .kpi-card {
-        background: #1f2937;
+        background: #1e293b;
         padding: 1.2rem 1.4rem;
         border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        transition: all 0.2s ease;
+        border: 1px solid rgba(255,255,255,0.05);
     }
 
     .kpi-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
     }
 
     .kpi-title {
         font-size: 0.85rem;
-        color: #9ca3af;
+        color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.6px;
     }
 
     .kpi-value {
@@ -181,7 +182,7 @@ if dark_mode:
     }
 
     .stButton>button {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
         color: white;
         border-radius: 12px;
         border: none;
@@ -192,7 +193,7 @@ if dark_mode:
 
     .stButton>button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
     }
     </style>
     """
