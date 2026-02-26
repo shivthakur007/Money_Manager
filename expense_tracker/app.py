@@ -73,7 +73,7 @@ def exchange_google_code(code):
         scopes=["openid", "email", "profile"],
         redirect_uri=REDIRECT_URI,
     )
-    flow.fetch_token(code=code, client_secret=GOOGLE_CLIENT_SECRET)
+    flow.fetch_token(code=code)
     return flow.credentials.id_token
     
 # ---------------- SESSION ----------------
@@ -115,14 +115,26 @@ if st.session_state.user is None:
 
     # Handle Google redirect
     query = st.query_params
-    if "code" in query:
-        id_token = exchange_google_code(query["code"])
-        resp = firebase_google_login(id_token)
-        if "localId" in resp:
-            st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
-            st.rerun()
-
+    if "code" in query and "oauth_done" not in st.session_state:
+        try:
+            code = query["code"]
+            st.session_state.oauth_done = True
+            st.query_params.clear()
+            id_token = exchange_google_code(code)
+            resp = firebase_google_login(id_token)
+            if "localId" in resp:
+                st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
+                st.rerun()
+            else:
+                st.error("Google login failed: " + str(resp.get("error", {}).get("message", "Unknown")))
+                st.session_state.pop("oauth_done", None)
+        except Exception as e:
+            st.error(f"OAuth error: {e}")
+            st.session_state.pop("oauth_done", None)
+    elif "code" in query:
+        st.query_params.clear()
     st.stop()
+    
 
 # ---------------- LOGOUT ----------------
 st.sidebar.success(f"Logged in as {st.session_state.user['email']}")
