@@ -5,3 +5,4 @@ pyrebase4
 plotly
 google-auth-oauthlib
 requests
+Authlib>=1.3.2
