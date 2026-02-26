@@ -47,7 +47,7 @@ if not st.user.is_logged_in:
             st.divider()
             st.markdown("Or sign in with Google")
             if st.button("Continue with Google"):
-                st.login("google")
+                st.login()
 
         with tab2:
             email = st.text_input("Email", key="signup_email")
