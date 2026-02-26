@@ -422,98 +422,91 @@ if not df.empty:
         st.plotly_chart(fig_bar, use_container_width=True)
 
     # ---------- SIDEBAR: DELETE + UPDATE ----------
+    # ---------- SIDEBAR: DELETE + UPDATE ----------
+    action_df = filtered_df.copy()
+
     with st.sidebar:
-    st.header("Delete Expense")
+        st.header("Delete Expense")
 
-    if not filtered_df.empty:
-
-        action_df = filtered_df.copy()
-
-        del_id = st.selectbox(
-            "Select expense to delete",
-            options=action_df["id"],
-            format_func=lambda x: (
-                f"{action_df.loc[action_df['id']==x, 'date'].values[0]} — "
-                f"{action_df.loc[action_df['id']==x, 'expense'].values[0]} — "
-                f"₹{action_df.loc[action_df['id']==x, 'amount'].values[0]:.2f} "
-                f"[{action_df.loc[action_df['id']==x, 'category'].values[0]}, "
-                f"{action_df.loc[action_df['id']==x, 'payment_mode'].values[0]}]"
+        if action_df.empty:
+            st.warning("No expenses available")
+        else:
+            del_id = st.selectbox(
+                "Select expense to delete",
+                options=action_df["id"],
+                format_func=lambda x: (
+                    f"{action_df.loc[action_df['id'] == x, 'date'].values[0]} - "
+                    f"{action_df.loc[action_df['id'] == x, 'expense'].values[0]} - "
+                    f"Rs {action_df.loc[action_df['id'] == x, 'amount'].values[0]:.2f} "
+                    f"[{action_df.loc[action_df['id'] == x, 'category'].values[0]}, "
+                    f"{action_df.loc[action_df['id'] == x, 'payment_mode'].values[0]}]"
+                ),
+                key="delete_id",
             )
-        )
 
-        if st.button("Delete Expense"):
-            expenses_ref.document(del_id).delete()
-            st.success("Expense deleted")
-            st.rerun()
+            if st.button("Delete Expense"):
+                expenses_ref.document(del_id).delete()
+                st.success("Expense deleted")
+                st.rerun()
 
-    else:
-        st.warning("No expenses available")
-        
-        st.header("Update Expense")
+            st.header("Update Expense")
 
-if not action_df.empty:
+            edit_id = st.selectbox(
+                "Select expense to edit",
+                options=action_df["id"],
+                format_func=lambda x: (
+                    f"{action_df.loc[action_df['id'] == x, 'date'].values[0]} - "
+                    f"{action_df.loc[action_df['id'] == x, 'expense'].values[0]} - "
+                    f"Rs {action_df.loc[action_df['id'] == x, 'amount'].values[0]:.2f}"
+                ),
+                key="edit_id",
+            )
 
-    edit_id = st.selectbox(
-        "Select expense to edit",
-        options=action_df["id"],
-        format_func=lambda x: (
-            f"{action_df.loc[action_df['id']==x, 'date'].values[0]} — "
-            f"{action_df.loc[action_df['id']==x, 'expense'].values[0]} — "
-            f"₹{action_df.loc[action_df['id']==x, 'amount'].values[0]:.2f}"
-        ),
-        key="edit_id"
-    )
+            selected_row = action_df[action_df["id"] == edit_id].iloc[0]
 
-    selected_row = action_df[action_df["id"] == edit_id].iloc[0]
+            new_expense = st.text_input("Update expense name", value=selected_row["expense"])
+            new_amount = st.number_input(
+                "Update amount",
+                min_value=0.0,
+                value=float(selected_row["amount"]),
+                step=50.0,
+                format="%.2f",
+            )
 
-    new_expense = st.text_input(
-        "Update expense name",
-        value=selected_row["expense"]
-    )
+            try:
+                selected_date = pd.to_datetime(selected_row["date"]).date()
+            except Exception:
+                selected_date = date.today()
 
-    new_amount = st.number_input(
-        "Update amount",
-        min_value=0.0,
-        value=float(selected_row["amount"]),
-        step=50.0,
-        format="%.2f"
-    )
+            new_date = st.date_input("Update date", value=selected_date)
 
-    try:
-        selected_date = pd.to_datetime(selected_row["date"]).date()
-    except Exception:
-        selected_date = date.today()
+            category_options = sorted(set(CATEGORIES + action_df["category"].tolist() + ["Other"]))
+            current_cat = selected_row["category"] if selected_row["category"] in category_options else "Other"
+            new_category = st.selectbox(
+                "Update category",
+                category_options,
+                index=category_options.index(current_cat),
+            )
 
-    new_date = st.date_input("Update date", value=selected_date)
+            payment_options = sorted(set(PAYMENT_MODES + action_df["payment_mode"].tolist() + ["Other"]))
+            current_pay = selected_row["payment_mode"] if selected_row["payment_mode"] in payment_options else "Other"
+            new_payment_mode = st.selectbox(
+                "Update payment mode",
+                payment_options,
+                index=payment_options.index(current_pay),
+            )
 
-    category_options = sorted(set(CATEGORIES + action_df["category"].tolist() + ["Other"]))
-    current_cat = selected_row["category"] if selected_row["category"] in category_options else "Other"
-
-    new_category = st.selectbox(
-        "Update category",
-        category_options,
-        index=category_options.index(current_cat)
-    )
-
-    payment_options = sorted(set(PAYMENT_MODES + action_df["payment_mode"].tolist() + ["Other"]))
-    current_pay = selected_row["payment_mode"] if selected_row["payment_mode"] in payment_options else "Other"
-
-    new_payment_mode = st.selectbox(
-        "Update payment mode",
-        payment_options,
-        index=payment_options.index(current_pay)
-    )
-
-    if st.button("Update Expense"):
-        expenses_ref.document(edit_id).update({
-            "expense": new_expense.strip(),
-            "amount": float(new_amount),
-            "category": new_category,
-            "payment_mode": new_payment_mode,
-            "date": new_date.isoformat()
-        })
-        st.success("Expense updated")
-        st.rerun()
-
+            if st.button("Update Expense"):
+                expenses_ref.document(edit_id).update(
+                    {
+                        "expense": new_expense.strip(),
+                        "amount": float(new_amount),
+                        "category": new_category,
+                        "payment_mode": new_payment_mode,
+                        "date": new_date.isoformat(),
+                    }
+                )
+                st.success("Expense updated")
+                st.rerun()
 else:
     st.warning("No expenses added yet")
