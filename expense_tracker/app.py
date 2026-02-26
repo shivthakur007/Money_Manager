@@ -14,32 +14,22 @@ st.set_page_config(page_title="Money Manager", layout="wide")
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
 GOOGLE_CLIENT_ID = st.secrets["auth"]["google_client_id"]
 GOOGLE_CLIENT_SECRET = st.secrets["auth"]["google_client_secret"]
-REDIRECT_URI = st.secrets["auth"]["redirect_uri"].strip()
 
-
-def firebase_email_signup(email, password):
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
-    payload = {"email": email, "password": password, "returnSecureToken": True}
-    return requests.post(url, json=payload).json()
-
-
-def firebase_email_login(email, password):
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
-    payload = {"email": email, "password": password, "returnSecureToken": True}
-    return requests.post(url, json=payload).json()
-
+# FORCE NORMALIZATION: 
+# This ensures REDIRECT_URI is exactly what Google wants, 
+# even if the secret is slightly different.
+RAW_URI = st.secrets["auth"]["redirect_uri"].strip()
+REDIRECT_URI = RAW_URI if RAW_URI.endswith("/") else RAW_URI + "/"
 
 def firebase_google_login(id_token):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={FIREBASE_API_KEY}"
     payload = {
         "postBody": f"id_token={id_token}&providerId=google.com",
-        "requestUri": REDIRECT_URI,
+        "requestUri": REDIRECT_URI, # Uses the normalized URI
         "returnSecureToken": True,
         "returnIdpCredential": True,
     }
     return requests.post(url, json=payload).json()
-
-
 
 def start_google_oauth():
     client_config = {
@@ -74,11 +64,10 @@ def exchange_google_code(code):
         scopes=["openid", "email", "profile"],
         redirect_uri=REDIRECT_URI,
     )
-    # This will now succeed because REDIRECT_URI is perfectly 
-    # matched between the start and the exchange.
+    # The error happened here because of the missing slash.
+    # Now that we force REDIRECT_URI to have a slash, it will match Google.
     flow.fetch_token(code=code)
     return flow.credentials.id_token
-
 
 # ---------------- SESSION ----------------
 if "user" not in st.session_state:
