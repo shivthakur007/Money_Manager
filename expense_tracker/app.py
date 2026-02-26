@@ -77,7 +77,7 @@ def exchange_google_code(code):
         scopes=["openid", "email", "profile"],
         redirect_uri=REDIRECT_URI,
     )
-    flow.fetch_token(code=code, client_secret=GOOGLE_CLIENT_SECRET)
+    flow.fetch_token(code=code)
     return flow.credentials.id_token
 
 # ---------------- SESSION ----------------
@@ -121,16 +121,34 @@ if st.session_state.user is None:
 
     # Handle Google redirect
     query = st.query_params
-    if "code" in query:
-        code = query["code"]
-        if isinstance(code, (list, tuple)):
-            code = code[0]
 
+if "code" in query and st.session_state.user is None:
+    code = query["code"]
+
+    if isinstance(code, (list, tuple)):
+        code = code[0]
+
+    try:
         id_token = exchange_google_code(code)
         resp = firebase_google_login(id_token)
-        if "localId" in resp:
-            st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
+
+        if resp.get("idToken"):
+            st.session_state.user = {
+                "uid": resp["localId"],
+                "email": resp["email"],
+            }
+
+            # 🔥 Clear query params immediately
+            st.query_params.clear()
+
             st.rerun()
+
+        else:
+            st.error("Google login failed.")
+
+    except Exception:
+        st.error("Authorization code expired. Please try again.")
+        st.query_params.clear()
 
     st.stop()
 
