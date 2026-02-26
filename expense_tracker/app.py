@@ -422,8 +422,7 @@ if not df.empty:
         st.plotly_chart(fig_bar, use_container_width=True)
 
     # ---------- SIDEBAR: DELETE + UPDATE ----------
-    # ---------- SIDEBAR: DELETE + UPDATE ----------
-    action_df = filtered_df.copy()
+  action_df = filtered_df.copy()
 
     with st.sidebar:
         st.header("Delete Expense")
