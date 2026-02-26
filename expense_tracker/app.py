@@ -40,47 +40,42 @@ def firebase_google_login(id_token):
     return requests.post(url, json=payload).json()
 
 
+
 def start_google_oauth():
+    client_config = {
+        "web": {
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": [REDIRECT_URI],
+        }
+    }
     flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [REDIRECT_URI],
-            }
-        },
+        client_config,
         scopes=["openid", "email", "profile"],
         redirect_uri=REDIRECT_URI,
     )
-
-    auth_url, _ = flow.authorization_url(
-        prompt="consent",
-        access_type="offline",
-        include_granted_scopes="true",
-    )
+    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
     return auth_url
 
 def exchange_google_code(code):
-    # Strip any accidental whitespace from the secret
-    current_uri = REDIRECT_URI.strip() 
-    
+    client_config = {
+        "web": {
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": [REDIRECT_URI],
+        }
+    }
     flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [current_uri],
-            }
-        },
+        client_config,
         scopes=["openid", "email", "profile"],
-        redirect_uri=current_uri,
+        redirect_uri=REDIRECT_URI,
     )
-    # This line 80 exchange will now succeed if current_uri 
-    # matches what you saved in the Google Cloud Console
+    # This will now succeed because REDIRECT_URI is perfectly 
+    # matched between the start and the exchange.
     flow.fetch_token(code=code)
     return flow.credentials.id_token
 
