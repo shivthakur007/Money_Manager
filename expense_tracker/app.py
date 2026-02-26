@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import requests
-from google_auth_oauthlib.flow import Flow
 import plotly.express as px
 from firebase_config import get_db
 
@@ -12,9 +11,6 @@ st.set_page_config(page_title="Money Manager", layout="wide")
 
 # ---------------- AUTH CONFIG ----------------
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
-GOOGLE_CLIENT_ID = st.secrets["auth"]["google_client_id"]
-GOOGLE_CLIENT_SECRET = st.secrets["auth"]["google_client_secret"]
-REDIRECT_URI = st.secrets["auth"]["redirect_uri"]
 
 def firebase_email_signup(email, password):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
@@ -26,124 +22,63 @@ def firebase_email_login(email, password):
     payload = {"email": email, "password": password, "returnSecureToken": True}
     return requests.post(url, json=payload).json()
 
-def firebase_google_login(id_token):
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={FIREBASE_API_KEY}"
-    payload = {
-        "postBody": f"id_token={id_token}&providerId=google.com",
-        "requestUri": REDIRECT_URI,
-        "returnSecureToken": True,
-        "returnIdpCredential": True,
-    }
-    return requests.post(url, json=payload).json()
-
-def start_google_oauth():
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [REDIRECT_URI],
-            }
-        },
-        scopes=["openid", "email", "profile"],
-        redirect_uri=REDIRECT_URI,
-    )
-
-    auth_url, _ = flow.authorization_url(
-        prompt="consent",
-        access_type="offline",
-        include_granted_scopes="true",
-    )
-
-    return auth_url
-
-def exchange_google_code(code):
-    import os
-    os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"  # ← add this line
-    
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [REDIRECT_URI],
-            }
-        },
-        scopes=["openid", "email", "profile"],
-        redirect_uri=REDIRECT_URI,
-    )
-    flow.fetch_token(code=code)
-    return flow.credentials.id_token
-    
-# ---------------- SESSION ----------------
-if "user" not in st.session_state:
-    st.session_state.user = None
-
 # ---------------- LOGIN UI ----------------
-if st.session_state.user is None:
-    st.title("Money Manager 💸")
-    st.markdown("Please sign in to continue")
+if not st.experimental_user.is_logged_in:
+    if "user" not in st.session_state:
+        st.session_state.user = None
 
-    tab1, tab2 = st.tabs(["Login", "Sign Up"])
+    if st.session_state.user is None:
+        st.title("Money Manager 💸")
+        st.markdown("Please sign in to continue")
 
-    with tab1:
-        email = st.text_input("Email", key="login_email")
-        password = st.text_input("Password", type="password", key="login_pass")
-        if st.button("Login"):
-            resp = firebase_email_login(email, password)
-            if "localId" in resp:
-                st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
-                st.rerun()
-            else:
-                st.error(resp.get("error", {}).get("message", "Login failed"))
+        tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
-        st.divider()
-        st.markdown("Or sign in with Google")
-        google_url = start_google_oauth()
-        st.link_button("Continue with Google", google_url)
+        with tab1:
+            email = st.text_input("Email", key="login_email")
+            password = st.text_input("Password", type="password", key="login_pass")
+            if st.button("Login"):
+                resp = firebase_email_login(email, password)
+                if "localId" in resp:
+                    st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
+                    st.rerun()
+                else:
+                    st.error(resp.get("error", {}).get("message", "Login failed"))
 
-    with tab2:
-        email = st.text_input("Email", key="signup_email")
-        password = st.text_input("Password", type="password", key="signup_pass")
-        if st.button("Create Account"):
-            resp = firebase_email_signup(email, password)
-            if "localId" in resp:
-                st.success("Account created. Please log in.")
-            else:
-                st.error(resp.get("error", {}).get("message", "Signup failed"))
+            st.divider()
+            st.markdown("Or sign in with Google")
+            if st.button("Continue with Google"):
+                st.login("google")
 
-    # Handle Google redirect
-    query = st.query_params
-    if "code" in query and "oauth_done" not in st.session_state:
-        try:
-            code = query["code"]
-            st.session_state.oauth_done = True
-            st.query_params.clear()
-            id_token = exchange_google_code(code)
-            resp = firebase_google_login(id_token)
-            if "localId" in resp:
-                st.session_state.user = {"uid": resp["localId"], "email": resp["email"]}
-                st.rerun()
-            else:
-                st.error("Google login failed: " + str(resp.get("error", {}).get("message", "Unknown")))
-                st.session_state.pop("oauth_done", None)
-        except Exception as e:
-            st.error(f"OAuth error: {e}")
-            st.session_state.pop("oauth_done", None)
-    elif "code" in query:
-        st.query_params.clear()
+        with tab2:
+            email = st.text_input("Email", key="signup_email")
+            password = st.text_input("Password", type="password", key="signup_pass")
+            if st.button("Create Account"):
+                resp = firebase_email_signup(email, password)
+                if "localId" in resp:
+                    st.success("Account created. Please log in.")
+                else:
+                    st.error(resp.get("error", {}).get("message", "Signup failed"))
+
+        st.stop()
+
+# ---------------- GET USER INFO ----------------
+if st.experimental_user.is_logged_in:
+    uid = st.experimental_user.sub
+    user_email = st.experimental_user.email
+elif "user" in st.session_state and st.session_state.user:
+    uid = st.session_state.user["uid"]
+    user_email = st.session_state.user["email"]
+else:
     st.stop()
-    
 
 # ---------------- LOGOUT ----------------
-st.sidebar.success(f"Logged in as {st.session_state.user['email']}")
+st.sidebar.success(f"Logged in as {user_email}")
 if st.sidebar.button("Logout"):
-    st.session_state.user = None
-    st.rerun()
+    if st.experimental_user.is_logged_in:
+        st.logout()
+    else:
+        st.session_state.user = None
+        st.rerun()
 
 # ---------------- UI THEME ----------------
 dark_mode = st.sidebar.toggle("Dark mode", value=False)
@@ -287,7 +222,6 @@ st.markdown("Money saved is equal to money earned")
 CATEGORIES = ["Food", "Transport", "Bills", "Shopping", "Entertainment", "Health", "Education", "Other"]
 PAYMENT_MODES = ["Cash", "Card", "UPI", "Bank Transfer", "Wallet", "Other"]
 
-uid = st.session_state.user["uid"]
 expenses_ref = db.collection("users").document(uid).collection("expenses")
 
 # ---------- SIDEBAR: ADD EXPENSE ----------
@@ -395,11 +329,12 @@ if not df.empty:
     else:
         top_category = "N/A"
         top_category_amount = 0
+
     col1, col2, col3 = st.columns(3)
     col1.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total Expense</div><div class='kpi-value'>₹{total:,.2f}</div></div>", unsafe_allow_html=True)
     col2.markdown(f"<div class='kpi-card'><div class='kpi-title'>This Month</div><div class='kpi-value'>₹{month_total:,.2f}</div></div>", unsafe_allow_html=True)
-    col3.markdown(f"<div class='kpi-card'>"f"<div class='kpi-title'>Top Category</div>"f"<div class='kpi-value'>{top_category}<br>₹{top_category_amount:,.2f}</div>"f"</div>",unsafe_allow_html=True)
-    
+    col3.markdown(f"<div class='kpi-card'><div class='kpi-title'>Top Category</div><div class='kpi-value'>{top_category}<br>₹{top_category_amount:,.2f}</div></div>", unsafe_allow_html=True)
+
     # ---------- TABLE + DOWNLOAD ----------
     st.subheader("Expenses")
     st.dataframe(
