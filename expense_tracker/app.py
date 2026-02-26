@@ -66,7 +66,142 @@ if not st.session_state.user:
 
     st.stop()   # 🔥 IMPORTANT — stops app if not logged in
 
+# ---------------- UI THEME ----------------
+dark_mode = st.sidebar.toggle("Dark mode", value=False)
 
+if dark_mode:
+    theme_css = """
+    <style>
+    .main {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #e2e8f0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    h1, h2, h3 {
+        color: #f8fafc;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+    }
+
+    .kpi-card {
+        background: #1e293b;
+        padding: 1.2rem 1.4rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        transition: all 0.2s ease;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+    }
+
+    .kpi-title {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 0.3rem;
+        color: #ffffff;
+    }
+
+    .stButton>button {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border-radius: 12px;
+        border: none;
+        padding: 0.6rem 1.4rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+    </style>
+    """
+else:
+    theme_css = """
+    <style>
+    .main {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: #0f172a;
+    }
+
+    h2, h3 {
+        color: #1e293b;
+    }
+
+    .kpi-card {
+        background: white;
+        padding: 1.2rem 1.4rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+    }
+
+    .kpi-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 0.3rem;
+        color: #0f172a;
+    }
+
+    .stButton>button {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: white;
+        border-radius: 12px;
+        border: none;
+        padding: 0.6rem 1.4rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.2);
+    }
+    </style>
+    """
+
+st.markdown(theme_css, unsafe_allow_html=True)
 # ---------------- AUTHENTICATED APP ----------------
 
 # Sidebar logout
