@@ -423,22 +423,32 @@ if not df.empty:
 
     # ---------- SIDEBAR: DELETE + UPDATE ----------
     with st.sidebar:
-        st.header("Delete Expense")
+    st.header("Delete Expense")
+
+    if not filtered_df.empty:
 
         action_df = filtered_df.copy()
-        action_df["label"] = action_df.apply(
-            lambda r: f"{r['date']} — {r['expense']} — ₹{r['amount']:.2f} [{r['category']}, {r['payment_mode']}]",
-            axis=1
-        )
 
-        del_label = st.selectbox("Select expense to delete", action_df["label"], key="del_label")
-        del_id = action_df.loc[action_df["label"] == del_label, "id"].values[0]
+        del_id = st.selectbox(
+            "Select expense to delete",
+            options=action_df["id"],
+            format_func=lambda x: (
+                f"{action_df.loc[action_df['id']==x, 'date'].values[0]} — "
+                f"{action_df.loc[action_df['id']==x, 'expense'].values[0]} — "
+                f"₹{action_df.loc[action_df['id']==x, 'amount'].values[0]:.2f} "
+                f"[{action_df.loc[action_df['id']==x, 'category'].values[0]}, "
+                f"{action_df.loc[action_df['id']==x, 'payment_mode'].values[0]}]"
+            )
+        )
 
         if st.button("Delete Expense"):
             expenses_ref.document(del_id).delete()
             st.success("Expense deleted")
             st.rerun()
 
+    else:
+        st.warning("No expenses available")
+        
         st.header("Update Expense")
 
         edit_label = st.selectbox("Select expense to edit", action_df["label"], key="edit_label")
