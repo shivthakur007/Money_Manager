@@ -389,7 +389,8 @@ if not df.empty:
     st.subheader("Expenses")
     st.dataframe(
         filtered_df[["date", "expense", "amount", "category", "payment_mode"]],
-        use_container_width=True
+        use_container_width=True,
+        hide_index=True
     )
 
     csv_data = filtered_df[["date", "expense", "amount", "category", "payment_mode"]].to_csv(index=False).encode("utf-8")
