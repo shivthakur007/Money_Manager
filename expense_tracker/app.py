@@ -10,63 +10,74 @@ db = get_db()
 
 st.set_page_config(page_title="Money Manager", layout="wide")
 
-# ---------------- AUTH CONFIG ----------------
+# ---------------- AUTH CONFIG (Your Original) ----------------
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
 GOOGLE_CLIENT_ID = st.secrets["auth"]["google_client_id"]
 GOOGLE_CLIENT_SECRET = st.secrets["auth"]["google_client_secret"]
+REDIRECT_URI = st.secrets["auth"]["redirect_uri"]
 
-# FORCE NORMALIZATION: 
-# This ensures REDIRECT_URI is exactly what Google wants, 
-# even if the secret is slightly different.
-RAW_URI = st.secrets["auth"]["redirect_uri"].strip()
-REDIRECT_URI = RAW_URI if RAW_URI.endswith("/") else RAW_URI + "/"
+
+def firebase_email_signup(email, password):
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
+    payload = {"email": email, "password": password, "returnSecureToken": True}
+    return requests.post(url, json=payload).json()
+
+
+def firebase_email_login(email, password):
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+    payload = {"email": email, "password": password, "returnSecureToken": True}
+    return requests.post(url, json=payload).json()
+
 
 def firebase_google_login(id_token):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key={FIREBASE_API_KEY}"
     payload = {
         "postBody": f"id_token={id_token}&providerId=google.com",
-        "requestUri": REDIRECT_URI, # Uses the normalized URI
+        "requestUri": REDIRECT_URI,
         "returnSecureToken": True,
         "returnIdpCredential": True,
     }
     return requests.post(url, json=payload).json()
 
+
 def start_google_oauth():
-    client_config = {
-        "web": {
-            "client_id": GOOGLE_CLIENT_ID,
-            "client_secret": GOOGLE_CLIENT_SECRET,
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [REDIRECT_URI],
-        }
-    }
     flow = Flow.from_client_config(
-        client_config,
+        {
+            "web": {
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": [REDIRECT_URI],
+            }
+        },
         scopes=["openid", "email", "profile"],
         redirect_uri=REDIRECT_URI,
     )
-    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+
+    auth_url, _ = flow.authorization_url(
+        prompt="consent",
+        access_type="offline",
+        include_granted_scopes="true",
+    )
     return auth_url
 
+
 def exchange_google_code(code):
-    client_config = {
-        "web": {
-            "client_id": GOOGLE_CLIENT_ID,
-            "client_secret": GOOGLE_CLIENT_SECRET,
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [REDIRECT_URI],
-        }
-    }
     flow = Flow.from_client_config(
-        client_config,
+        {
+            "web": {
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": [REDIRECT_URI],
+            }
+        },
         scopes=["openid", "email", "profile"],
         redirect_uri=REDIRECT_URI,
     )
-    # The error happened here because of the missing slash.
-    # Now that we force REDIRECT_URI to have a slash, it will match Google.
-    flow.fetch_token(code=code)
+    flow.fetch_token(code=code, client_secret=GOOGLE_CLIENT_SECRET)
     return flow.credentials.id_token
 
 # ---------------- SESSION ----------------
