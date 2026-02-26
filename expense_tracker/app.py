@@ -10,7 +10,7 @@ db = get_db()
 st.set_page_config(page_title="Money Manager", layout="wide")
 
 # ---------------- AUTH CONFIG ----------------
-FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
+FIREBASE_API_KEY = st.secrets["firebase"]["api_key"]
 
 def firebase_email_signup(email, password):
     url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
