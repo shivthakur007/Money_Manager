@@ -23,7 +23,7 @@ def firebase_email_login(email, password):
     return requests.post(url, json=payload).json()
 
 # ---------------- LOGIN UI ----------------
-if not st.experimental_user.is_logged_in:
+if not st.user.is_logged_in:
     if "user" not in st.session_state:
         st.session_state.user = None
 
@@ -62,9 +62,9 @@ if not st.experimental_user.is_logged_in:
         st.stop()
 
 # ---------------- GET USER INFO ----------------
-if st.experimental_user.is_logged_in:
-    uid = st.experimental_user.sub
-    user_email = st.experimental_user.email
+if st.user.is_logged_in:
+    uid = st.user.sub
+    user_email = st.user.email
 elif "user" in st.session_state and st.session_state.user:
     uid = st.session_state.user["uid"]
     user_email = st.session_state.user["email"]
@@ -74,7 +74,7 @@ else:
 # ---------------- LOGOUT ----------------
 st.sidebar.success(f"Logged in as {user_email}")
 if st.sidebar.button("Logout"):
-    if st.experimental_user.is_logged_in:
+    if st.user.is_logged_in:
         st.logout()
     else:
         st.session_state.user = None
@@ -459,3 +459,4 @@ if not df.empty:
                 st.rerun()
 else:
     st.warning("No expenses added yet")
+
