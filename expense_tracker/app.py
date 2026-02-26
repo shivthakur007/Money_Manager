@@ -136,26 +136,131 @@ dark_mode = st.sidebar.toggle("Dark mode", value=False)
 if dark_mode:
     theme_css = """
     <style>
-    .main { background: #0b1220; color: #e5e7eb; }
-    .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
-    h1, h2, h3 { color: #e5e7eb; }
-    .kpi-card { background: #111827; color: #e5e7eb; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
-    .kpi-title { color: #9ca3af; }
-    .stButton>button { background: #2563eb; color: white; }
-    .stButton>button:hover { background: #1d4ed8; }
+    .main {
+        background: linear-gradient(135deg, #0b1220, #111827);
+        color: #e5e7eb;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    h1, h2, h3 {
+        color: #f3f4f6;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+    }
+
+    .kpi-card {
+        background: #1f2937;
+        padding: 1.2rem 1.4rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .kpi-title {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 0.3rem;
+        color: #ffffff;
+    }
+
+    .stButton>button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border-radius: 12px;
+        border: none;
+        padding: 0.6rem 1.4rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+    }
     </style>
     """
 else:
     theme_css = """
     <style>
-    .main { background: #f4f6fb; }
-    .block-container { padding-top: 1.5rem; padding-bottom: 2rem; }
-    h1 { font-size: 2.3rem; letter-spacing: -0.5px; }
-    .kpi-card { background: white; padding: 1rem 1.2rem; border-radius: 14px; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08); }
-    .kpi-title { font-size: 0.9rem; color: #475569; }
-    .kpi-value { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
-    .stButton>button { background: #0f172a; color: white; border-radius: 10px; border: none; padding: 0.6rem 1.2rem; }
-    .stButton>button:hover { background: #1f2937; }
+    .main {
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: #0f172a;
+    }
+
+    h2, h3 {
+        color: #1e293b;
+    }
+
+    .kpi-card {
+        background: white;
+        padding: 1.2rem 1.4rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+    }
+
+    .kpi-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+    }
+
+    .kpi-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 0.3rem;
+        color: #0f172a;
+    }
+
+    .stButton>button {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: white;
+        border-radius: 12px;
+        border: none;
+        padding: 0.6rem 1.4rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.2);
+    }
     </style>
     """
 st.markdown(theme_css, unsafe_allow_html=True)
