@@ -267,12 +267,17 @@ if not df.empty:
         filtered_df["sort_date"].dt.month == date.today().month
     ]["amount"].sum()
     avg_entry = total / max(len(filtered_df), 1)
-    top_category = (filtered_df.groupby("category")["amount"].sum().idxmax())
-
+    if not filtered_df.empty:
+        category_summary = filtered_df.groupby("category")["amount"].sum()
+        top_category = category_summary.idxmax()
+        top_category_amount = category_summary.max()
+    else:
+        top_category = "N/A"
+        top_category_amount = 0
     col1, col2, col3 = st.columns(3)
     col1.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total Expense</div><div class='kpi-value'>₹{total:,.2f}</div></div>", unsafe_allow_html=True)
     col2.markdown(f"<div class='kpi-card'><div class='kpi-title'>This Month</div><div class='kpi-value'>₹{month_total:,.2f}</div></div>", unsafe_allow_html=True)
-    col3.markdown(f"<div class='kpi-card'><div class='kpi-title'>Top Category</div><div class='kpi-value'>₹{top_category:,.2f}</div></div>", unsafe_allow_html=True)
+    col3.markdown(f"<div class='kpi-card'>"f"<div class='kpi-title'>Top Category</div>"f"<div class='kpi-value'>{top_category}<br>₹{top_category_amount:,.2f}</div>"f"</div>",unsafe_allow_html=True)
     
     # ---------- TABLE + DOWNLOAD ----------
     st.subheader("Expenses")
