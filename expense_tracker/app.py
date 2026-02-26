@@ -64,10 +64,12 @@ if st.session_state.user is None:
 
     
 # ---------------- LOGOUT ----------------
-st.sidebar.success(f"Logged in as {st.session_state.user['email']}")
-if st.sidebar.button("Logout"):
-    st.session_state.user = None
-    st.rerun()
+if st.session_state.user is not None:
+    st.sidebar.success(f"Logged in as {st.session_state.user['email']}")
+
+    if st.sidebar.button("Logout"):
+        st.session_state.user = None
+        st.rerun()
 
 # ---------------- UI THEME ----------------
 dark_mode = st.sidebar.toggle("Dark mode", value=False)
