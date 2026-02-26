@@ -14,7 +14,7 @@ st.set_page_config(page_title="Money Manager", layout="wide")
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
 GOOGLE_CLIENT_ID = st.secrets["auth"]["google_client_id"]
 GOOGLE_CLIENT_SECRET = st.secrets["auth"]["google_client_secret"]
-REDIRECT_URI = st.secrets["auth"]["redirect_uri"]
+REDIRECT_URI = st.secrets["auth"]["redirect_uri"].strip()
 
 
 def firebase_email_signup(email, password):
