@@ -13,9 +13,13 @@ This project combines authentication, database integration, analytics, and UI en
 
 🔐 Authentication System
 The app supports:
+
 ✅ Email & Password login (Firebase Authentication REST API)
+
 ✅ Google OAuth 2.0 login
+
 ✅ Secure session management
+
 ✅ User-specific expense storage
 
 Each user’s data is isolated using:
