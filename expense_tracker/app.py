@@ -528,4 +528,4 @@ if not df.empty:
                 st.rerun()
 else:
     st.warning("No expenses added yet")
-Do you think there is any issue in this code
+
