@@ -272,7 +272,7 @@ if not df.empty:
     col1, col2, col3 = st.columns(3)
     col1.markdown(f"<div class='kpi-card'><div class='kpi-title'>Total Expense</div><div class='kpi-value'>₹{total:,.2f}</div></div>", unsafe_allow_html=True)
     col2.markdown(f"<div class='kpi-card'><div class='kpi-title'>This Month</div><div class='kpi-value'>₹{month_total:,.2f}</div></div>", unsafe_allow_html=True)
-    col3.markdown(f"<div class='kpi-card'><div class='kpi-title'>This Month</div><div class='kpi-value'>₹{month_total:,.2f}</div></div>", unsafe_allow_html=True)
+    col3.markdown(f"<div class='kpi-card'><div class='kpi-title'>Top Category</div><div class='kpi-value'>₹{top_category:,.2f}</div></div>", unsafe_allow_html=True)
     
     # ---------- TABLE + DOWNLOAD ----------
     st.subheader("Expenses")
