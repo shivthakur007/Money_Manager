@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import requests
+import pytesseract
+from PIL import Image
+import re
 import plotly.express as px
 from firebase_config import get_db
 
@@ -215,9 +218,67 @@ expenses_ref = db.collection("users").document(uid).collection("expenses")
 
 # ---------- SIDEBAR: ADD EXPENSE ----------
 with st.sidebar:
+
+    st.subheader("Scan Bill (OCR)")
+
+    uploaded_file = st.file_uploader("Upload bill image", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Bill", use_column_width=True)
+    
+        if st.button("Extract from Bill"):
+            text = pytesseract.image_to_string(image)
+    
+            # Extract amount
+            amounts = re.findall(r"\d+\.\d+|\d+", text)
+            detected_amount = max(map(float, amounts)) if amounts else 0
+    
+            # Extract expense name
+            lines = text.split("\n")
+            detected_expense = lines[0] if lines else "Scanned Expense"
+    
+            # Store TEMP (not final)
+            st.session_state.ocr_preview = {
+                "amount": detected_amount,
+                "expense": detected_expense,
+                "text": text
+            }
+
+    if "ocr_preview" in st.session_state:
+
+    st.markdown("### 🔍 Review Extracted Data")
+
+    preview = st.session_state.ocr_preview
+
+    edited_expense = st.text_input("Edit Expense", value=preview["expense"], key="edit_exp")
+    edited_amount = st.number_input(
+        "Edit Amount",
+        value=float(preview["amount"]),
+        min_value=0.0,
+        step=10.0,
+        key="edit_amt"
+    )
+
+    st.text_area("OCR Text (for debugging)", preview["text"], height=120)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("✅ Confirm"):
+            st.session_state.ocr_expense = edited_expense
+            st.session_state.ocr_amount = edited_amount
+            st.success("Data confirmed! Now click Add Expense.")
+
+    with col2:
+        if st.button("❌ Cancel"):
+            st.session_state.pop("ocr_preview", None)
+            st.warning("OCR discarded")
+            
     st.header("Add Expense")
-    expense = st.text_input("Enter expense")
-    amount = st.number_input("Enter amount", min_value=0.0, step=50.0, format="%.2f")
+    expense = st.text_input( "Enter expense",value=st.session_state.get("ocr_expense", ""))
+
+    amount = st.number_input("Enter amount",value=float(st.session_state.get("ocr_amount", 0.0)),)
     expense_date = st.date_input("Expense date", value=date.today())
 
     category = st.selectbox("Category", CATEGORIES + ["Other"])
