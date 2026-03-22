@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import pandas as pd
 from datetime import date
 import requests
@@ -7,6 +8,8 @@ from PIL import Image
 import re
 import plotly.express as px
 from firebase_config import get_db
+st.write("Checking tesseract path...")
+st.write(os.path.exists("/usr/bin/tesseract"))
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 st.write("Version:", pytesseract.get_tesseract_version())
 
