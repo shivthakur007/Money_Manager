@@ -8,6 +8,8 @@ from PIL import Image
 import re
 import plotly.express as px
 from firebase_config import get_db
+st.write("Working dir:", os.getcwd())
+st.write("Files:", os.listdir())
 
 db = get_db()
 
