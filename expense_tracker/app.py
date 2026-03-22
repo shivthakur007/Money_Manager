@@ -247,35 +247,35 @@ with st.sidebar:
 
     if "ocr_preview" in st.session_state:
 
-    st.markdown("### 🔍 Review Extracted Data")
-
-    preview = st.session_state.ocr_preview
-
-    edited_expense = st.text_input("Edit Expense", value=preview["expense"], key="edit_exp")
-    edited_amount = st.number_input(
-        "Edit Amount",
-        value=float(preview["amount"]),
-        min_value=0.0,
-        step=10.0,
-        key="edit_amt"
-    )
-
-    st.text_area("OCR Text (for debugging)", preview["text"], height=120)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("✅ Confirm"):
-            st.session_state.ocr_expense = edited_expense
-            st.session_state.ocr_amount = edited_amount
-            st.success("Data confirmed! Now click Add Expense.")
-
-    with col2:
-        if st.button("❌ Cancel"):
-            st.session_state.pop("ocr_preview", None)
-            st.warning("OCR discarded")
-            
-    st.header("Add Expense")
+        st.markdown("### 🔍 Review Extracted Data")
+    
+        preview = st.session_state.ocr_preview
+    
+        edited_expense = st.text_input("Edit Expense", value=preview["expense"], key="edit_exp")
+        edited_amount = st.number_input(
+            "Edit Amount",
+            value=float(preview["amount"]),
+            min_value=0.0,
+            step=10.0,
+            key="edit_amt"
+        )
+    
+        st.text_area("OCR Text (for debugging)", preview["text"], height=120)
+    
+        col1, col2 = st.columns(2)
+    
+        with col1:
+            if st.button("✅ Confirm"):
+                st.session_state.ocr_expense = edited_expense
+                st.session_state.ocr_amount = edited_amount
+                st.success("Data confirmed! Now click Add Expense.")
+    
+        with col2:
+            if st.button("❌ Cancel"):
+                st.session_state.pop("ocr_preview", None)
+                st.warning("OCR discarded")
+                
+        st.header("Add Expense")
     expense = st.text_input( "Enter expense",value=st.session_state.get("ocr_expense", ""))
 
     amount = st.number_input("Enter amount",value=float(st.session_state.get("ocr_amount", 0.0)),)
