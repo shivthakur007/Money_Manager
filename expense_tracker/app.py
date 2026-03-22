@@ -8,6 +8,7 @@ import re
 import plotly.express as px
 from firebase_config import get_db
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+st.write("Version:", pytesseract.get_tesseract_version())
 
 db = get_db()
 
