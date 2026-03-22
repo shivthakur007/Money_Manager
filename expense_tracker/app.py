@@ -7,6 +7,7 @@ from PIL import Image
 import re
 import plotly.express as px
 from firebase_config import get_db
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 db = get_db()
 
