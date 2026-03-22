@@ -246,11 +246,8 @@ with st.sidebar:
             }
 
     if "ocr_preview" in st.session_state:
-
         st.markdown("### 🔍 Review Extracted Data")
-    
         preview = st.session_state.ocr_preview
-    
         edited_expense = st.text_input("Edit Expense", value=preview["expense"], key="edit_exp")
         edited_amount = st.number_input(
             "Edit Amount",
@@ -261,15 +258,12 @@ with st.sidebar:
         )
     
         st.text_area("OCR Text (for debugging)", preview["text"], height=120)
-    
         col1, col2 = st.columns(2)
-    
         with col1:
             if st.button("✅ Confirm"):
                 st.session_state.ocr_expense = edited_expense
                 st.session_state.ocr_amount = edited_amount
                 st.success("Data confirmed! Now click Add Expense.")
-    
         with col2:
             if st.button("❌ Cancel"):
                 st.session_state.pop("ocr_preview", None)
