@@ -275,7 +275,7 @@ with st.sidebar:
                 st.session_state.pop("ocr_preview", None)
                 st.warning("OCR discarded")
                 
-        st.header("Add Expense")
+    st.header("Add Expense")
     expense = st.text_input( "Enter expense",value=st.session_state.get("ocr_expense", ""))
 
     amount = st.number_input("Enter amount",value=float(st.session_state.get("ocr_amount", 0.0)),)
