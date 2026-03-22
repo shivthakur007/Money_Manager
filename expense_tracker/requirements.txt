@@ -6,3 +6,6 @@ plotly
 google-auth-oauthlib
 requests
 Authlib>=1.3.2
+pytesseract
+Pillow
+opencv-python
