@@ -242,14 +242,25 @@ with st.sidebar:
     
             text = pytesseract.image_to_string(thresh, config="--oem 3 --psm 6")
     
-            # Extract amount
-            amounts = re.findall(r"\d+\.\d+|\d+", text)
-            detected_amount = max(map(float, amounts)) if amounts else 0
-    
-            # Extract expense name
-            lines = text.split("\n")
-            detected_expense = lines[0] if lines else "Scanned Expense"
-    
+            # Clean text
+            text = text.replace("\n\n", "\n")
+            lines = [line.strip() for line in text.split("\n") if line.strip()]
+            
+            # Extract amount (only proper money values)
+            amounts = re.findall(r"₹?\s?\d+\.\d{2}", text)
+            cleaned_amounts = [float(a.replace("₹", "").strip()) for a in amounts]
+            detected_amount = max(cleaned_amounts) if cleaned_amounts else 0
+            
+            # Extract merchant / expense
+            detected_expense = "Scanned Expense"
+            
+            for line in lines:
+                if "paid to" in line.lower():
+                    detected_expense = line
+                    break
+                elif "upi" not in line.lower() and len(line) < 40:
+                    detected_expense = line
+                
             # Store TEMP
             st.session_state.ocr_preview = {
                 "amount": detected_amount,
