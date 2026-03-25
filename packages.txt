@@ -1,3 +1,2 @@
 tesseract-ocr
-opencv-python-headless
 tesseract-ocr-eng
