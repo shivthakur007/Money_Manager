@@ -4,6 +4,8 @@ import pandas as pd
 from datetime import date
 import requests
 import pytesseract
+import cv2
+import numpy as np
 from PIL import Image
 import re
 import plotly.express as px
@@ -225,27 +227,36 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Upload bill image", type=["jpg", "jpeg", "png"])
     
     if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Bill", use_column_width=True)
-    
-        if st.button("Extract from Bill"):
-            text = pytesseract.image_to_string(image)
-    
-            # Extract amount
-            amounts = re.findall(r"\d+\.\d+|\d+", text)
-            detected_amount = max(map(float, amounts)) if amounts else 0
-    
-            # Extract expense name
-            lines = text.split("\n")
-            detected_expense = lines[0] if lines else "Scanned Expense"
-    
-            # Store TEMP (not final)
-            st.session_state.ocr_preview = {
-                "amount": detected_amount,
-                "expense": detected_expense,
-                "text": text
-            }
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Bill", use_column_width=True)
 
+    if st.button("Extract from Bill"):
+        # 🔥 NEW: OpenCV preprocessing
+        import cv2
+        import numpy as np
+
+        img = np.array(image)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (5, 5), 0)
+        thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)[1]
+
+        text = pytesseract.image_to_string(thresh, config="--oem 3 --psm 6")
+
+        # Extract amount
+        amounts = re.findall(r"\d+\.\d+|\d+", text)
+        detected_amount = max(map(float, amounts)) if amounts else 0
+
+        # Extract expense name
+        lines = text.split("\n")
+        detected_expense = lines[0] if lines else "Scanned Expense"
+
+        # Store TEMP
+        st.session_state.ocr_preview = {
+            "amount": detected_amount,
+            "expense": detected_expense,
+            "text": text
+        }
+        
     if "ocr_preview" in st.session_state:
         st.markdown("### 🔍 Review Extracted Data")
         preview = st.session_state.ocr_preview
