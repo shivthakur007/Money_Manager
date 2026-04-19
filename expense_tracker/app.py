@@ -4,7 +4,6 @@ import pandas as pd
 from datetime import date
 import requests
 import pytesseract
-import cv2
 import numpy as np
 from PIL import Image
 import re
