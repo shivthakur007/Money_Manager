@@ -10,3 +10,4 @@ pytesseract
 Pillow
 opencv-python
 opencv-python-headless
+opencv-python-headless
