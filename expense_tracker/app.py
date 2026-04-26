@@ -9,6 +9,7 @@ from PIL import Image
 import re
 import plotly.express as px
 from firebase_config import get_db
+from bill_scanner import render_bill_scanner
 
 db = get_db()
 
@@ -348,6 +349,7 @@ if not df.empty:
         .encode("utf-8")
     )
     st.download_button("Download CSV", csv_data, file_name="expenses.csv", mime="text/csv")
+    render_bill_scanner(expenses_ref, CATEGORIES, PAYMENT_MODES)
 
     # ---------- CHARTS (PLOTLY) ----------
     st.subheader("Spending Trend")
@@ -462,4 +464,5 @@ if not df.empty:
                 st.rerun()
 else:
     st.warning("No expenses added yet")
+    render_bill_scanner(expenses_ref, CATEGORIES, PAYMENT_MODES)
 
