@@ -13,7 +13,7 @@ from bill_scanner import render_bill_scanner
 
 db = get_db()
 
-st.set_page_config(page_title="Money Manager", layout="wide")
+st.set_page_config(page_title="Money Manager", layout="Centered")
 
 # ---------------- AUTH CONFIG (Your Original) ----------------
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
@@ -36,12 +36,22 @@ if "user" not in st.session_state:
 
 # ---------------- LOGIN UI ----------------
 if st.session_state.user is None:
-    st.title("Money Manager 💸")
-    st.markdown("Please sign in to continue")
-
+    with open("static/login.css") as f:
+      css = f.read()
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
     with tab1:
+
+        st.markdown("""
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Money Manage₹</h1>
+                <p>A Place To Track Your Finances</p>
+            </div>
+        """, unsafe_allow_html=True)
+
         email = st.text_input("Email", key="login_email")
         password = st.text_input("Password", type="password", key="login_pass")
 
@@ -53,18 +63,38 @@ if st.session_state.user is None:
             else:
                 st.error(resp.get("error", {}).get("message", "Login failed"))
 
+        st.markdown("</div>", unsafe_allow_html=True)
+
     with tab2:
+        st.markdown("""
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Create Account</h1>
+                <p>Start Managing Your Finances</p>
+            </div>
+        """, unsafe_allow_html=True)
+
         email = st.text_input("Email", key="signup_email")
-        password = st.text_input("Password", type="password", key="signup_pass")
+
+        password = st.text_input(
+            "Password",
+            type="password",
+            key="signup_pass"
+        )
 
         if st.button("Create Account"):
+
             resp = firebase_email_signup(email, password)
+
             if "localId" in resp:
                 st.success("Account created. Please log in.")
-            else:
-                st.error(resp.get("error", {}).get("message", "Signup failed"))
 
-    st.stop()
+            else:
+                st.error(
+                    resp.get("error", {}).get("message", "Signup failed")
+                )
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ---------------- LOGOUT ----------------
