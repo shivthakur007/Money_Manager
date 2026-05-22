@@ -95,7 +95,7 @@ if st.session_state.user is None:
                 )
 
         st.markdown("</div>", unsafe_allow_html=True)
-
+    st.stop()
 
 # ---------------- LOGOUT ----------------
 if st.session_state.user is not None:
@@ -105,6 +105,7 @@ if st.session_state.user is not None:
     if st.sidebar.button("Logout"):
         st.session_state.user = None
         st.rerun()
+        
 
 # ---------------- UI THEME ----------------
 dark_mode = st.sidebar.toggle("Dark mode", value=False)
