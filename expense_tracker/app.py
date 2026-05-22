@@ -36,7 +36,7 @@ if "user" not in st.session_state:
 
 # ---------------- LOGIN UI ----------------
 if st.session_state.user is None:
-    with open("static/login.css") as f:
+    with open("static/style.css") as f:
       css = f.read()
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
     
