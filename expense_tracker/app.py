@@ -13,7 +13,7 @@ from bill_scanner import render_bill_scanner
 
 db = get_db()
 
-st.set_page_config(page_title="Money Manager", layout="Centered")
+st.set_page_config(page_title="Money Manager", layout="centered")
 
 # ---------------- AUTH CONFIG (Your Original) ----------------
 FIREBASE_API_KEY = st.secrets["auth"]["api_key"]
